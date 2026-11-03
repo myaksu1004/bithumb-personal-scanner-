@@ -1,0 +1,49 @@
+{
+  "version": "3.0",
+  "scan": {
+    "ticker_top_n": 40,
+    "deep_top_n": 16,
+    "output_n": 16
+  },
+  "ma": {
+    "periods": [7, 14, 30, 60, 180],
+    "tight_spread_pct": 0.8,
+    "good_spread_pct": 1.5,
+    "max_setup_spread_pct": 2.0,
+    "overextension_warn_pct": 3.0,
+    "overextension_block_pct": 5.0
+  },
+  "volume": {
+    "rvol_watch": 1.2,
+    "rvol_confirm": 1.5,
+    "rvol_strong": 2.0
+  },
+  "bollinger": {
+    "period": 20,
+    "std_mult": 2.0,
+    "squeeze_percentile": 25,
+    "upper_near_pct": 0.5,
+    "upper_ride_min_bars": 3
+  },
+  "entry": {
+    "rsi_min": 42,
+    "rsi_max": 68,
+    "rsi_hot": 75,
+    "breakout_close_position": 0.70,
+    "near_level_pct": 1.2
+  },
+  "risk": {
+    "atr_period": 14,
+    "atr_stop_mult": 1.5,
+    "structure_buffer_atr": 0.25,
+    "min_rr": 1.5,
+    "preferred_rr": 2.0
+  },
+  "flow": {
+    "bid_ask_good": 1.25,
+    "bid_ask_strong": 2.0,
+    "trade_strength_good": 105,
+    "trade_strength_strong": 120,
+    "trade_strength_hot": 160
+  }
+}
