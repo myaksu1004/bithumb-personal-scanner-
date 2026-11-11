@@ -1,8 +1,11 @@
 services:
   - type: web
-    name: bithumb-personal-scanner
+    name: coin-higher-low-v5
     runtime: python
     plan: free
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app_fixed:app --bind 0.0.0.0:$PORT --timeout 120
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --timeout 180 --workers 1 --threads 4
     healthCheckPath: /health
+    envVars:
+      - key: EXCHANGE
+        value: bithumb

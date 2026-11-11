@@ -1,12 +1,18 @@
 {
-  "version": "3.0",
+  "version": "5.0",
   "scan": {
-    "ticker_top_n": 40,
-    "deep_top_n": 16,
-    "output_n": 16
+    "ticker_top_n": 55,
+    "deep_top_n": 24,
+    "output_n": 20
   },
   "ma": {
-    "periods": [7, 14, 30, 60, 180],
+    "periods": [
+      7,
+      14,
+      30,
+      60,
+      180
+    ],
     "tight_spread_pct": 0.8,
     "good_spread_pct": 1.5,
     "max_setup_spread_pct": 2.0,
@@ -29,7 +35,7 @@
     "rsi_min": 42,
     "rsi_max": 68,
     "rsi_hot": 75,
-    "breakout_close_position": 0.70,
+    "breakout_close_position": 0.7,
     "near_level_pct": 1.2
   },
   "risk": {
@@ -37,7 +43,12 @@
     "atr_stop_mult": 1.5,
     "structure_buffer_atr": 0.25,
     "min_rr": 1.5,
-    "preferred_rr": 2.0
+    "preferred_rr": 2.0,
+    "max_stop_pct": 3.5,
+    "min_stop_pct": 0.8,
+    "stop_atr_mult": 1.1,
+    "stop_buffer_atr": 0.15,
+    "max_entry_slippage_pct": 0.5
   },
   "flow": {
     "bid_ask_good": 1.25,
@@ -45,5 +56,22 @@
     "trade_strength_good": 105,
     "trade_strength_strong": 120,
     "trade_strength_hot": 160
+  },
+  "guard": {
+    "drawdown_lookback_15m": 24,
+    "max_drawdown_from_high_pct": 8.0,
+    "max_24h_rise_pct": 18.0,
+    "rsi_recovery_min": 42,
+    "max_consecutive_red_15m": 3,
+    "min_recent_volume_ratio": 0.7
+  },
+  "structure": {
+    "pivot_left": 2,
+    "pivot_right": 2,
+    "min_higher_lows": 2,
+    "min_higher_low_pct": 0.3,
+    "max_higher_low_gap_pct": 30,
+    "min_structure_score": 65,
+    "min_timing_score": 65
   }
 }
