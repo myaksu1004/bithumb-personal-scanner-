@@ -1,35 +1,24 @@
 {
-  "version": "5.1",
+  "version": "5.2",
   "scan": {
     "ticker_top_n": 55,
     "deep_top_n": 24,
     "output_n": 20
   },
   "ma": {
-    "periods": [
-      7,
-      14,
-      30,
-      60,
-      180
-    ],
-    "tight_spread_pct": 0.8,
     "good_spread_pct": 1.5,
-    "max_setup_spread_pct": 2.0,
     "overextension_warn_pct": 3.0,
     "overextension_block_pct": 5.0
   },
   "volume": {
     "rvol_watch": 1.2,
-    "rvol_confirm": 1.5,
-    "rvol_strong": 2.0
+    "rvol_confirm": 1.5
   },
   "bollinger": {
     "period": 20,
     "std_mult": 2.0,
     "squeeze_percentile": 25,
-    "upper_near_pct": 0.5,
-    "upper_ride_min_bars": 3
+    "upper_near_pct": 0.5
   },
   "entry": {
     "rsi_min": 42,
@@ -40,8 +29,6 @@
   },
   "risk": {
     "atr_period": 14,
-    "atr_stop_mult": 1.5,
-    "structure_buffer_atr": 0.25,
     "min_rr": 1.5,
     "preferred_rr": 2.0,
     "max_stop_pct": 3.5,
@@ -52,9 +39,7 @@
     "min_stop_atr_mult": 0.7
   },
   "flow": {
-    "bid_ask_good": 1.25,
     "bid_ask_strong": 2.0,
-    "trade_strength_good": 105,
     "trade_strength_strong": 120,
     "trade_strength_hot": 160
   },
@@ -71,7 +56,6 @@
     "pivot_right": 2,
     "min_higher_lows": 2,
     "min_higher_low_pct": 0.3,
-    "max_higher_low_gap_pct": 30,
     "min_structure_score": 65,
     "min_timing_score": 65,
     "support_wick_tolerance_pct": 0.3,
@@ -90,5 +74,36 @@
     "rsi_weak": 43,
     "entry_block_score": 55,
     "risk_weight": 0.45
+  },
+  "_not_yet_used": {
+    "_설명": "값은 보존했지만 app.py가 아직 읽지 않는 기준. 여기 숫자를 바꿔도 탐색 결과는 변하지 않음.",
+    "ma": {
+      "periods": [
+        7,
+        14,
+        30,
+        60,
+        180
+      ],
+      "tight_spread_pct": 0.8,
+      "max_setup_spread_pct": 2.0
+    },
+    "volume": {
+      "rvol_strong": 2.0
+    },
+    "bollinger": {
+      "upper_ride_min_bars": 3
+    },
+    "risk": {
+      "atr_stop_mult": 1.5,
+      "structure_buffer_atr": 0.25
+    },
+    "flow": {
+      "bid_ask_good": 1.25,
+      "trade_strength_good": 105
+    },
+    "structure": {
+      "max_higher_low_gap_pct": 30
+    }
   }
 }
