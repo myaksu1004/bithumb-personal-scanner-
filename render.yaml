@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: coin-higher-low-v5
+    name: bithumb-higher-low-v5-1
     runtime: python
     plan: free
     buildCommand: pip install -r requirements.txt
