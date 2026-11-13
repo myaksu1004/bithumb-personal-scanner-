@@ -75,6 +75,15 @@
     "entry_block_score": 55,
     "risk_weight": 0.45
   },
+  "rebound": {
+    "_설명": "단기 반등 관찰 태그 기준. 판정·진입 계획에는 영향 없음.",
+    "rsi_oversold": 30,
+    "div_rsi_max": 40,
+    "div_min_rsi_gap": 2.0,
+    "fresh_bars": 2,
+    "climax_rvol": 2.0,
+    "sweep_lookback": 40
+  },
   "_not_yet_used": {
     "_설명": "값은 보존했지만 app.py가 아직 읽지 않는 기준. 여기 숫자를 바꿔도 탐색 결과는 변하지 않음.",
     "ma": {

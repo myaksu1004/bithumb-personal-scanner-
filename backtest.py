@@ -110,6 +110,14 @@ def run_market(market, days, args):
         for key, ahead in (("fwd4h", 16), ("fwd24h", 96)):
             if i + ahead < len(c15):
                 d[key].append((sc.f(c15[i + ahead]["trade_price"]) - close) / close * 100)
+        # 반등 태그별 사후 등락률 (관찰용). '태그:'는 전체, '대기+태그:'는 'B형 반등 대기' 중에 뜬 경우만.
+        for tag in r.get("rebound", []):
+            for key in ["태그: " + tag] + (["대기+태그: " + tag] if r["decision"] == "B형 반등 대기" else []):
+                g = decisions.setdefault(key, {"n": 0, "fwd4h": [], "fwd24h": []})
+                g["n"] += 1
+                for fk, ahead in (("fwd4h", 16), ("fwd24h", 96)):
+                    if i + ahead < len(c15):
+                        g[fk].append((sc.f(c15[i + ahead]["trade_price"]) - close) / close * 100)
         if r["decision"] != ENTRY_DECISION:
             i += 1
             continue

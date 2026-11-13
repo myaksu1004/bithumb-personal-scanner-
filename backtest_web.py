@@ -119,6 +119,8 @@ table{width:100%;border-collapse:collapse;font-size:12px}th,td{padding:7px 4px;b
 const $=q=>document.querySelector(q),esc=t=>String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;');
 const sign=v=>v==null?'-':(v>0?'+':'')+v+'%',cls=v=>v==null?'':v>0?'good':v<0?'bad':'';
 const num=v=>Number(v).toLocaleString('ko-KR',{maximumFractionDigits:4});
+const isTag=d=>/^(태그|대기\+태그): /.test(d.name);
+const row=d=>`<tr><td>${esc(d.name)}</td><td>${d.n}</td><td class="${cls(d.fwd4h)}">${sign(d.fwd4h)}</td><td class="${cls(d.fwd24h)}">${sign(d.fwd24h)}</td></tr>`;
 let timer=null;
 $('#go').onclick=async()=>{const q=new URLSearchParams({markets:$('#m').value,days:$('#d').value,fee:$('#f').value});$('#out').innerHTML='';
   try{const r=await fetch('/backtest/start?'+q),d=await r.json();if(!d.ok&&r.status!==429){$('#status').textContent=d.detail||'시작 실패';return}}catch(e){$('#status').textContent='서버 연결 실패: '+e.message;return}
@@ -134,9 +136,11 @@ function render(j){let h='';const s=j.summary;
   if(bad.length)h+='<div class="card warn"><h2>확인 필요</h2>'+bad.map(x=>x.error?`${esc(x.market)}: ${esc(x.error)}`:`${esc(x.market)}: 분석 불가 봉 ${x.skipped_bars}개 (${esc(x.skip_reasons.join(', '))})`).join('<br>')+'</div>';
   h+='<div class="card"><h2>\'B형 진입 검토\' 신호대로 매매한 결과</h2>';
   if(!s)h+='<div class="sub">체결된 거래가 없습니다. 기간을 늘리거나 다른 종목으로 해 보세요.</div>';
-  else{h+='<div class="grid">'+Object.entries(s).map(([k,v])=>`<div class="s"><span>${esc(k)}</span><b class="${/수익률|평균 R|R 합계/.test(k)?cls(v):''}">${v==null?'-':v}</b></div>`).join('')+'</div>';
+  else{h+='<div class="grid">'+Object.entries(s).map(([k,v])=>`<div class="s"><span>${esc(k)}</span><b class="${/^(수익률 합계|평균 수익률|평균 R|R 합계)/.test(k)?cls(v):''}">${v==null?'-':v}</b></div>`).join('')+'</div>';
     h+='<div class="note">청산 사유: '+Object.entries(j.exits).map(([k,v])=>`${esc(k)} ${v}건`).join(' · ')+(s['거래 수']<30?'<br><span class="warn">※ 거래 수가 30건 미만이라 통계적으로 믿기 어렵습니다. 방향만 참고하세요.</span>':'')+'</div>'}
-  h+='</div><div class="card"><h2>판정별 빈도와 이후 평균 등락률</h2><div class="scroll"><table><tr><th>판정</th><th>횟수</th><th>4시간 뒤</th><th>24시간 뒤</th></tr>'+j.decisions.map(d=>`<tr><td>${esc(d.name)}</td><td>${d.n}</td><td class="${cls(d.fwd4h)}">${sign(d.fwd4h)}</td><td class="${cls(d.fwd24h)}">${sign(d.fwd24h)}</td></tr>`).join('')+'</table></div><div class="note">\'B형 진입 검토\'의 이후 등락률이 다른 판정보다 높아야 판정에 구분력이 있는 것입니다.</div></div>';
+  h+='</div><div class="card"><h2>판정별 빈도와 이후 평균 등락률</h2><div class="scroll"><table><tr><th>판정</th><th>횟수</th><th>4시간 뒤</th><th>24시간 뒤</th></tr>'+j.decisions.filter(d=>!isTag(d)).map(row).join('')+'</table></div><div class="note">\'B형 진입 검토\'의 이후 등락률이 다른 판정보다 높아야 판정에 구분력이 있는 것입니다.</div></div>';
+  const tg=j.decisions.filter(isTag);
+  h+='<div class="card"><h2>반등 태그별 이후 평균 등락률 (관찰용)</h2>'+(tg.length?'<div class="scroll"><table><tr><th>태그</th><th>횟수</th><th>4시간 뒤</th><th>24시간 뒤</th></tr>'+tg.map(row).join('')+'</table></div>':'<div class="sub">이 기간에는 반등 태그가 뜨지 않았습니다.</div>')+'<div class="note">\'태그:\'는 전체 구간, \'대기+태그:\'는 \'B형 반등 대기\' 중에 뜬 경우만 센 것입니다. 위 표의 \'B형 반등 대기\' 줄보다 등락률이 뚜렷이 높고 횟수가 30회 이상일 때만 의미가 있습니다. 태그는 진입 판정에 반영되지 않습니다.</div></div>';
   if(j.trades.length)h+='<div class="card"><h2>거래 내역 ('+j.trades.length+'건)</h2><div class="scroll"><table><tr><th>종목</th><th>진입시각</th><th>사유</th><th>수익률</th><th>R</th><th>손절폭</th><th>진입가</th><th>청산가</th></tr>'+j.trades.map(t=>`<tr><td>${esc(t['종목'])}</td><td>${t['진입시각'].slice(5)}</td><td>${esc(t['사유'])}</td><td class="${cls(t['수익률%'])}">${sign(t['수익률%'])}</td><td>${t['R']}</td><td>${t['손절폭%']}%</td><td>${num(t['진입가'])}</td><td>${num(t['청산가'])}</td></tr>`).join('')+'</table></div></div>';
   $('#out').innerHTML=h}
 poll();

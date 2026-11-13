@@ -25,7 +25,7 @@ HTML = r'''<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name
 const esc=t=>String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;');
 const won=v=>v>=1e8?(v/1e8).toFixed(1)+"억":Math.round(v).toLocaleString();
 const px=v=>v==null?'-':(v>=1000?Math.round(v).toLocaleString():v>=100?v.toFixed(1):v>=1?v.toFixed(2):v.toFixed(4));
-async function scan(){const s=document.querySelector('#status'),l=document.querySelector('#list');s.textContent='B형 저점 상승 후보 탐색 → 진입 타이밍 분석 중…';l.innerHTML='';try{const r=await fetch('/api/scan');const d=await r.json();if(!r.ok||d.ok===false)throw new Error(d.detail||d.error||'API 오류');s.textContent='완료 · '+d.note;l.innerHTML=d.items.map(x=>`<div class="card"><div class="row"><div><span class="coin">${x.market}</span> ${px(x.price)}원<div class="meta">${x.change>=0?'+':''}${x.change.toFixed(2)}% · 24H ${won(x.turnover)} · RVOL ${x.rvol.toFixed(2)} · RSI15 ${x.rsi15.toFixed(1)}</div></div><span class="badge">${x.decision}</span></div><div class="scores"><div class="score"><b>${x.structure}</b><span>Structure</span></div><div class="score"><b>${x.timing}</b><span>Timing</span></div><div class="score"><b>${x.trend}</b><span>Trend</span></div><div class="score"><b>${x.setup}</b><span>Setup</span></div><div class="score"><b>${x.entry}</b><span>Entry</span></div><div class="score"><b>${x.risk}</b><span>Risk (상대 점수)</span></div><div class="score"><b>${x.pressure.score}</b><span>매도 압력 (높을수록 위험)</span></div></div><div class="patterns">${x.patterns.map(p=>`<span class="tag">${p}</span>`).join('')}</div><div class="decision ${x.decision_class}">${x.summary}</div><div class="plan"><div class="p"><b>${px(x.plan.entry)}</b><span>진입 기준</span></div><div class="p"><b>${px(x.plan.stop)}</b><span>단기 구조 손절</span></div><div class="p"><b>${px(x.plan.target1)}</b><span>1차 목표</span></div><div class="p"><b>${px(x.plan.target2)}</b><span>2차 목표</span></div><div class="p"><b>${x.plan.rr==null?'-':x.plan.rr.toFixed(2)+'R'}</b><span>1차 목표 R:R</span></div></div><div class="meta">분석 기준가 ${px(x.basis_price)}원 (현재가와 ${x.price_gap_pct>=0?'+':''}${x.price_gap_pct.toFixed(2)}% 차이) · 손절 거리 ${x.plan.stop_pct.toFixed(2)}% · ATR 기준 최소 ${x.plan.noise_floor_pct.toFixed(2)}% · 패턴 ${x.pattern_type} · MA7 이격 ${x.ma7_gap.toFixed(2)}% · 매수/매도잔량 ${x.bid_ask_ratio.toFixed(2)}배 · 체결강도(근사) ${x.trade_strength.toFixed(0)}%</div><div class="reason">✓ ${x.reasons.map(esc).join(' · ')||'조건 탐색 중'}${x.guard_flags&&x.guard_flags.length?`<br><span class="bad">⛔ 하락 방어: ${x.guard_flags.map(esc).join(' · ')}</span>`:''}${x.pressure.flags.length?`<br><span class="warn">매도 압력: ${x.pressure.flags.map(esc).join(' · ')}</span>`:''}${x.warnings.length?`<br><span class="warn">⚠ ${x.warnings.map(esc).join(' · ')}</span>`:''}${x.invalidations.length?`<br><span class="bad">⛔ 무효화: ${x.invalidations.map(esc).join(' · ')}</span>`:''}</div></div>`).join('');}catch(e){s.textContent='탐색 실패: '+e.message}}
+async function scan(){const s=document.querySelector('#status'),l=document.querySelector('#list');s.textContent='B형 저점 상승 후보 탐색 → 진입 타이밍 분석 중…';l.innerHTML='';try{const r=await fetch('/api/scan');const d=await r.json();if(!r.ok||d.ok===false)throw new Error(d.detail||d.error||'API 오류');s.textContent='완료 · '+d.note;l.innerHTML=d.items.map(x=>`<div class="card"><div class="row"><div><span class="coin">${x.market}</span> ${px(x.price)}원<div class="meta">${x.change>=0?'+':''}${x.change.toFixed(2)}% · 24H ${won(x.turnover)} · RVOL ${x.rvol.toFixed(2)} · RSI15 ${x.rsi15.toFixed(1)}</div></div><span class="badge">${x.decision}</span></div><div class="scores"><div class="score"><b>${x.structure}</b><span>Structure</span></div><div class="score"><b>${x.timing}</b><span>Timing</span></div><div class="score"><b>${x.trend}</b><span>Trend</span></div><div class="score"><b>${x.setup}</b><span>Setup</span></div><div class="score"><b>${x.entry}</b><span>Entry</span></div><div class="score"><b>${x.risk}</b><span>Risk (상대 점수)</span></div><div class="score"><b>${x.pressure.score}</b><span>매도 압력 (높을수록 위험)</span></div></div><div class="patterns">${x.patterns.map(p=>`<span class="tag">${p}</span>`).join('')}${(x.rebound||[]).map(p=>`<span class="tag" style="background:#ecfdf3;color:#067647">↗ ${p}</span>`).join('')}</div><div class="decision ${x.decision_class}">${x.summary}</div><div class="plan"><div class="p"><b>${px(x.plan.entry)}</b><span>진입 기준</span></div><div class="p"><b>${px(x.plan.stop)}</b><span>단기 구조 손절</span></div><div class="p"><b>${px(x.plan.target1)}</b><span>1차 목표</span></div><div class="p"><b>${px(x.plan.target2)}</b><span>2차 목표</span></div><div class="p"><b>${x.plan.rr==null?'-':x.plan.rr.toFixed(2)+'R'}</b><span>1차 목표 R:R</span></div></div><div class="meta">분석 기준가 ${px(x.basis_price)}원 (현재가와 ${x.price_gap_pct>=0?'+':''}${x.price_gap_pct.toFixed(2)}% 차이) · 손절 거리 ${x.plan.stop_pct.toFixed(2)}% · ATR 기준 최소 ${x.plan.noise_floor_pct.toFixed(2)}% · 패턴 ${x.pattern_type} · MA7 이격 ${x.ma7_gap.toFixed(2)}% · 매수/매도잔량 ${x.bid_ask_ratio.toFixed(2)}배 · 체결강도(근사) ${x.trade_strength.toFixed(0)}%</div><div class="reason">✓ ${x.reasons.map(esc).join(' · ')||'조건 탐색 중'}${x.guard_flags&&x.guard_flags.length?`<br><span class="bad">⛔ 하락 방어: ${x.guard_flags.map(esc).join(' · ')}</span>`:''}${x.pressure.flags.length?`<br><span class="warn">매도 압력: ${x.pressure.flags.map(esc).join(' · ')}</span>`:''}${x.warnings.length?`<br><span class="warn">⚠ ${x.warnings.map(esc).join(' · ')}</span>`:''}${x.invalidations.length?`<br><span class="bad">⛔ 무효화: ${x.invalidations.map(esc).join(' · ')}</span>`:''}</div></div>`).join('');}catch(e){s.textContent='탐색 실패: '+e.message}}
 </script></body></html>'''
 
 # 빗썸 공개 시세 API: 보수적인 요청 간격 및 429 재시도.
@@ -284,6 +284,56 @@ def selling_pressure(c15,c60,t):
             'change24_pct':round(drop24,2),'drawdown15_pct':round(drawdown,2),
             'rvol':round(rv,2)}
 
+def rsi_series(a,n=14):
+    """rsi()와 같은 Wilder 방식으로 봉마다의 RSI를 돌려준다."""
+    out=[50.0]*len(a)
+    if len(a)<n+1:return out
+    ds=[a[i]-a[i-1] for i in range(1,len(a))]
+    g=sum(max(x,0) for x in ds[:n])/n; l=sum(max(-x,0) for x in ds[:n])/n
+    out[n]=100.0 if l==0 else 100-(100/(1+g/l))
+    for k,x in enumerate(ds[n:],start=n+1):
+        g=(g*(n-1)+max(x,0))/n; l=(l*(n-1)+max(-x,0))/n
+        out[k]=100.0 if l==0 else 100-(100/(1+g/l))
+    return out
+
+REBOUND_DEFAULT={'rsi_oversold':30,'div_rsi_max':40,'div_min_rsi_gap':2.0,'fresh_bars':2,
+                 'climax_rvol':2.0,'sweep_lookback':40}
+
+def rebound_signals(c15):
+    """확정 15분봉 기준 단기 반등 태그. 관찰용이며 판정(decision)·진입 계획에는 영향을 주지 않는다."""
+    cfg={**REBOUND_DEFAULT,**CFG.get('rebound',{})}
+    n=len(c15)
+    if n<40:return []
+    p=closes(c15); lo=lows(c15); rs=rsi_series(p); last=c15[-1]; tags=[]
+    bn=CFG['bollinger']['period']; bm=CFG['bollinger']['std_mult']
+    # 1) 과매도 후 복귀: RSI가 과매도선을 위로 되찾거나, 볼린저 하단 밖 종가 → 밴드 안 종가
+    _,_,lb_now,_=bb_at(p,n-1,bn,bm); _,_,lb_prev,_=bb_at(p,n-2,bn,bm)
+    if (rs[-2]<cfg['rsi_oversold']<=rs[-1]) or (lb_prev and lb_now and p[-2]<lb_prev and p[-1]>lb_now):
+        tags.append('과매도 복귀')
+    # 2) RSI 상승 다이버전스: 방금 확정된 스윙 저점이 직전 저점보다 낮은데 RSI는 더 높음
+    right=CFG['structure']['pivot_right']
+    piv=confirmed_pivots(c15,'low',lookback=60)
+    if len(piv)>=2:
+        (i1,l1),(i2,l2)=piv[-2],piv[-1]
+        if i2>=n-1-right-cfg['fresh_bars'] and l2<l1 and rs[i1]<cfg['div_rsi_max'] and rs[i2]>=rs[i1]+cfg['div_min_rsi_gap'] and bullish(last):
+            tags.append('RSI 상승 다이버전스')
+    # 3) 투매 후 반전: 직전 봉이 거래대금 터진 음봉, 이번 봉이 그 봉의 중간값 위에서 마감한 양봉
+    v=vals(c15,'candle_acc_trade_price'); base=sum(v[-22:-2])/20 if n>=22 else 0
+    prev=c15[-2]
+    if base and v[-2]/base>=cfg['climax_rvol'] and not bullish(prev) and bullish(last) and p[-1]>(f(prev['high_price'])+f(prev['low_price']))/2:
+        tags.append('투매 후 반전')
+    # 4) 저점 스윕 후 회복: 최근 2개 봉이 직전 스윙 저점을 처음으로 깼다가 종가는 그 위로 회복
+    older=[x for x in piv if n-cfg['sweep_lookback']<=x[0]<=n-3-right]
+    if older:
+        i0,level=older[-1]
+        if min(lo[-2:])<level<p[-1] and bullish(last) and min(lo[i0+1:n-2] or [level])>=level:
+            tags.append('저점 스윕 후 회복')
+    # 5) 단기 이평 리클레임: 직전 종가는 MA7·MA14 아래, 이번 종가는 둘 다 위
+    m7,m14,pm7,pm14=ma(p,7),ma(p,14),ma(p[:-1],7),ma(p[:-1],14)
+    if p[-2]<min(pm7,pm14) and p[-1]>max(m7,m14) and bullish(last):
+        tags.append('단기 이평 리클레임')
+    return tags
+
 def timing_score(c15,c60):
     p=closes(c15); h=macd_hist(p); r=rsi(p); score=0
     if p[-1]>ma(p,7):score+=20
@@ -471,6 +521,7 @@ def score_all(t,c4,c60,c15,cd,now_dt=None,flow=None):
     plan=make_trade_plan(c4,c60,c15,pattern_scores,structure_info)
     guard_flags,guard_metrics=entry_guard(c15,t)
     pressure=selling_pressure(c15,c60,t)
+    rebound=rebound_signals(c15)
     if pressure['flags']:warnings.extend(pressure['flags'])
     if guard_flags:warnings.extend(guard_flags)
     if not plan['stop_eligible']:
@@ -565,7 +616,9 @@ def score_all(t,c4,c60,c15,cd,now_dt=None,flow=None):
         decision='A/C 보조 관찰';dclass='';summary='보조 패턴 탐지. B형의 연속 저점 상승 조건은 아직 충족하지 못함.'
     else:
         decision='구조 미확인';dclass='bad';summary='확정된 4시간봉 저점 상승 구조가 충분하지 않음.'
-    return dict(market=t['market'].replace('KRW-',''),price=f(t['trade_price']),basis_price=now,price_gap_pct=round(price_gap,2),change=f(t.get('signed_change_rate'))*100,turnover=tv,rvol=rv,rsi15=rr,trend=trend,setup=int(round(setup)),entry=entry,risk=risk,pressure=pressure,structure=structure,timing=timing,pattern_type=pattern_type,structure_info=structure_info,patterns=patterns,pattern_scores=pattern_scores,decision=decision,decision_class=dclass,summary=summary,plan={k:(round(v,8) if isinstance(v,float) else v) for k,v in plan.items() if k in ('entry','stop','stop_pct','stop_too_tight','noise_floor_pct','target1','target2','rr')},ma7_gap=ma7_gap,bid_ask_ratio=ratio,trade_strength=strength,guard=guard_metrics,guard_flags=guard_flags,reasons=reasons[:10],warnings=warnings[:8],invalidations=invalid[:4])
+    if rebound and decision=='B형 반등 대기':
+        summary+=' 단기 반등 태그 감지('+', '.join(rebound)+'): 관찰용이며 진입 신호는 아님.'
+    return dict(rebound=rebound,market=t['market'].replace('KRW-',''),price=f(t['trade_price']),basis_price=now,price_gap_pct=round(price_gap,2),change=f(t.get('signed_change_rate'))*100,turnover=tv,rvol=rv,rsi15=rr,trend=trend,setup=int(round(setup)),entry=entry,risk=risk,pressure=pressure,structure=structure,timing=timing,pattern_type=pattern_type,structure_info=structure_info,patterns=patterns,pattern_scores=pattern_scores,decision=decision,decision_class=dclass,summary=summary,plan={k:(round(v,8) if isinstance(v,float) else v) for k,v in plan.items() if k in ('entry','stop','stop_pct','stop_too_tight','noise_floor_pct','target1','target2','rr')},ma7_gap=ma7_gap,bid_ask_ratio=ratio,trade_strength=strength,guard=guard_metrics,guard_flags=guard_flags,reasons=reasons[:10],warnings=warnings[:8],invalidations=invalid[:4])
 
 def preliminary(t):
     c4=candles(t['market'],240,200); p4=closes(c4); m7,m14,m30=ma(p4,7),ma(p4,14),ma(p4,30); rv=rvol(c4)
@@ -623,7 +676,7 @@ def scan():
         SCAN_LOCK.release()
 
 @app.get('/health')
-def health(): return {'ok':True,'version':'v5.2','strategy':'higher-low-primary','exchange':EXCHANGE}
+def health(): return {'ok':True,'version':'v5.2.1','strategy':'higher-low-primary','exchange':EXCHANGE}
 
 # 백테스트 화면(/backtest). 위의 함수들이 모두 정의된 뒤에 불러와야 한다.
 from backtest_web import bp as backtest_bp
