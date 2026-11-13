@@ -538,8 +538,8 @@ def score_all(t,c4,c60,c15,cd,now_dt=None,flow=None):
     if m4[14]>m4[30]:trend+=15; reasons.append('4H MA14>MA30')
     if m4[30]>m4[60]:trend+=10
     if p4[-1]>m4[60]:trend+=10
-    if p4[-1]>m4[180]:trend+=10
-    if m4[60]>m4[180]:trend+=10
+    if m4[180] and p4[-1]>m4[180]:trend+=10   # 4시간봉이 180개 미만이면 MA180이 없으므로 가점 없음
+    if m4[180] and m4[60]>m4[180]:trend+=10
     if ctx['hh4']:trend+=10; reasons.append('4H 고점 상승')
     if ctx['hl4']:trend+=10; reasons.append('4H 저점 상승')
     if ctx['d180']['above']:trend+=10; reasons.append('일봉 180선 위')
@@ -676,7 +676,7 @@ def scan():
         SCAN_LOCK.release()
 
 @app.get('/health')
-def health(): return {'ok':True,'version':'v5.2.1','strategy':'higher-low-primary','exchange':EXCHANGE}
+def health(): return {'ok':True,'version':'v5.2.2','strategy':'higher-low-primary','exchange':EXCHANGE}
 
 # 백테스트 화면(/backtest). 위의 함수들이 모두 정의된 뒤에 불러와야 한다.
 from backtest_web import bp as backtest_bp
