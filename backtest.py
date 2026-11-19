@@ -8,11 +8,14 @@ app.py의 score_all()을 과거 15분봉마다 그대로 다시 실행해서,
   python backtest.py --top 10 --days 30 --fee 0.04
 
 실시간 탐색과 다른 점 (결과 해석 시 주의):
-  - 호가/체결강도는 과거 데이터가 없어 중립값(1.0배, 100%)으로 둔다.
+  - 호가/체결강도는 과거 데이터가 없어 잔량 1.0배 · 체결강도 미산정(None)으로 둔다.
+    따라서 체결강도·호가벽·사다리 조건은 백테스트 점수에 반영되지 않는다(실시간 전용).
   - 24시간 등락률·거래대금은 캔들로 근사한다.
   - 실시간의 '거래대금 상위 55개 → 1차 점수 상위 24개' 선별은 재현하지 않고, 지정한 종목 전체를 본다.
   - 같은 15분봉 안에서 손절과 목표가 모두 닿으면 손절로 처리한다(보수적).
-  - 1차 목표에서 전량 청산으로 가정한다. 슬리피지는 수수료 외에 반영하지 않는다.
+  - 기본은 실제 매매 방식대로 원금 회수(1R)에서 절반 익절 후 손절을 진입가로 올리고,
+    잔여 물량을 1차 목표까지 끌고 간다. --no-partial 을 주면 1차 목표 전량 청산으로 계산한다.
+  - 슬리피지는 수수료 외에 반영하지 않는다.
 """
 import argparse, bisect, csv, json, os, sys, time
 from datetime import datetime, timedelta
@@ -65,16 +68,29 @@ def close_times(c, minutes=None):
     return [opened(x) + d for x in c]
 
 
-def simulate_exit(c15, start, fill, stop, target, max_hold):
-    """start 봉부터 청산까지. 반환: (청산 인덱스, 청산가, 사유)"""
+def simulate_exit(c15, start, fill, stop, target, max_hold, recover=None, portion=0.0):
+    """start 봉부터 청산까지.
+    recover가 있으면 그 가격에서 portion 비중을 먼저 팔아 원금을 회수하고,
+    남은 물량은 손절을 진입가(본전)로 올린 뒤 목표까지 끌고 간다.
+    같은 봉 안에서는 손절 → 원금회수 → 목표 순으로 보수적으로 처리한다.
+    반환: (청산 인덱스, 비중가중 평균 청산가, 사유)"""
     end = min(len(c15) - 1, start + max_hold - 1)
+    if not (recover and portion > 0 and recover > fill and (not target or recover < target)):
+        recover, portion = None, 0.0
+    took = 0.0; realized = 0.0; cur_stop = stop
     for j in range(start, end + 1):
         o, h, l = (sc.f(c15[j][k]) for k in ("opening_price", "high_price", "low_price"))
-        if l <= stop:
-            return j, (min(o, stop) if j > start else stop), "손절"
+        if l <= cur_stop:
+            px = (min(o, cur_stop) if j > start else cur_stop)
+            return j, realized + px * (1 - took), ("손절" if took == 0 else "원금회수 후 잔여 본전청산")
+        if recover and took == 0 and h >= recover:
+            px = max(o, recover) if j > start else recover
+            realized += px * portion; took = portion; cur_stop = max(cur_stop, fill)
         if target and h >= target:
-            return j, (max(o, target) if j > start else target), "1차 목표"
-    return end, sc.f(c15[end]["trade_price"]), ("기간 종료" if end == len(c15) - 1 and end < start + max_hold - 1 else "보유시간 초과")
+            px = max(o, target) if j > start else target
+            return j, realized + px * (1 - took), ("1차 목표" if took == 0 else "원금회수 후 목표")
+    px = sc.f(c15[end]["trade_price"])
+    return end, realized + px * (1 - took), ("기간 종료" if end == len(c15) - 1 and end < start + max_hold - 1 else "보유시간 초과")
 
 
 def run_market(market, days, args):
@@ -100,7 +116,7 @@ def run_market(market, days, args):
                 "signed_change_rate": (close - prev_close) / prev_close if prev_close else 0,
                 "acc_trade_price_24h": sum(turn[max(0, i - 95):i + 1])}
         try:
-            r = sc.score_all(tick, w4, w60, w15, wd, now_dt=T, flow=(1.0, 1.0, 100))
+            r = sc.score_all(tick, w4, w60, w15, wd, now_dt=T, flow=dict(sc.EMPTY_FLOW))
         except Exception as e:
             errors[str(e)[:40] or type(e).__name__] = errors.get(str(e)[:40] or type(e).__name__, 0) + 1
             i += 1
@@ -123,6 +139,8 @@ def run_market(market, days, args):
             continue
         plan = r["plan"]
         entry, stop, target = plan["entry"], plan["stop"], plan["target1"]
+        recover = plan.get("recover") if args.partial else None
+        portion = sc.CFG.get("exit", {}).get("recover_portion_pct", 50) / 100 if args.partial else 0.0
         fill_idx = fill = None
         if entry <= close * (1 + slip / 100):          # 현재가 진입: 다음 봉 시가에 체결
             o = sc.f(c15[i + 1]["opening_price"])
@@ -140,7 +158,7 @@ def run_market(market, days, args):
         if fill_idx is None or (target and target <= fill):
             i += 1
             continue
-        x, exit_price, why = simulate_exit(c15, fill_idx, fill, stop, target, args.max_hold)
+        x, exit_price, why = simulate_exit(c15, fill_idx, fill, stop, target, args.max_hold, recover, portion)
         gross = (exit_price - fill) / fill * 100
         net = gross - 2 * args.fee
         risk_pct = (fill - stop) / fill * 100
@@ -148,7 +166,9 @@ def run_market(market, days, args):
                        "신호시각": T.strftime("%Y-%m-%d %H:%M"),
                        "진입시각": (opened(c15[fill_idx])).strftime("%Y-%m-%d %H:%M"),
                        "청산시각": (opened(c15[x]) + timedelta(minutes=15)).strftime("%Y-%m-%d %H:%M"),
-                       "진입가": fill, "손절가": stop, "목표가": target, "청산가": exit_price,
+                       "진입가": fill, "손절가": stop, "목표가": target, "원금회수가": recover, "청산가": exit_price,
+                       "진입유형": plan.get("entry_type"), "손절근거": plan.get("stop_source") or "구조 지지",
+                       "진입봉": (r.get("entry_check") or {}).get("state"),
                        "사유": why, "손절폭%": round(risk_pct, 2), "수익률%": round(net, 3),
                        "R": round(net / risk_pct, 2) if risk_pct > 0 else 0,
                        "계획RR": plan["rr"], "Structure": r["structure"], "Timing": r["timing"],
@@ -187,6 +207,8 @@ def main():
     ap.add_argument("--fee", type=float, default=0.04, help="편도 수수료 %% (본인 계정 수수료율로 지정)")
     ap.add_argument("--max-hold", type=int, default=192, help="최대 보유 15분봉 수 (192=2일)")
     ap.add_argument("--entry-wait", type=int, default=4, help="돌파형 진입가 대기 15분봉 수")
+    ap.add_argument("--no-partial", dest="partial", action="store_false",
+                    help="원금 회수 분할 익절 없이 1차 목표 전량 청산으로 계산")
     ap.add_argument("--out", default="backtest_trades.csv")
     ap.add_argument("--no-cache", dest="cache", action="store_false", help="캔들 캐시(bt_cache/) 미사용")
     args = ap.parse_args()
@@ -202,7 +224,8 @@ def main():
         ticks.sort(key=lambda x: sc.f(x.get("acc_trade_price_24h")), reverse=True)
         markets = [x["market"] for x in ticks[:args.top]]
 
-    print(f"[{sc.EXCHANGE}] {len(markets)}개 종목 · 최근 {args.days}일 · 편도 수수료 {args.fee}%")
+    mode = "원금 회수(1R) 분할 익절" if args.partial else "1차 목표 전량 청산"
+    print(f"[{sc.EXCHANGE}] {len(markets)}개 종목 · 최근 {args.days}일 · 편도 수수료 {args.fee}% · {mode}")
     all_trades, all_dec = [], {}
     for m in markets:
         t0 = time.time()

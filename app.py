@@ -9,23 +9,24 @@ if EXCHANGE not in ("bithumb", "upbit"):
     raise ValueError("EXCHANGE must be bithumb or upbit")
 BASE = "https://api.bithumb.com" if EXCHANGE == "bithumb" else "https://api.upbit.com"
 S = requests.Session()
-S.headers.update({"accept":"application/json","user-agent":"CoinStructureScanner/5.2"})
+S.headers.update({"accept":"application/json","user-agent":"CoinStructureScanner/5.3"})
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 with open(os.path.join(HERE, "strategy_config.json"), "r", encoding="utf-8") as f:
     CFG = json.load(f)
 
-HTML = r'''<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>코인 저점상승 탐색기 v5.2</title>
+HTML = r'''<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>코인 저점상승 탐색기 v5.3</title>
 <style>
 :root{--bg:#f4f5f7;--card:#fff;--text:#16181c;--sub:#667085;--line:#e5e7eb;--good:#067647;--warn:#b54708;--bad:#b42318;--blue:#175cd3}
-*{box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR",sans-serif;background:var(--bg);margin:0;color:var(--text)}header{background:#fff;padding:20px 16px;border-bottom:1px solid var(--line)}h1{font-size:23px;margin:0 0 5px}.sub{font-size:12px;color:var(--sub);line-height:1.5}main{max-width:980px;margin:auto;padding:14px}.btn{width:100%;padding:16px;border:0;border-radius:14px;background:#111;color:#fff;font-size:17px;font-weight:800}.card{background:var(--card);border-radius:17px;padding:15px;margin:13px 0;box-shadow:0 1px 5px #0001}.row{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}.coin{font-size:21px;font-weight:850}.badge{padding:6px 9px;border-radius:999px;background:#eef0f2;font-weight:800;font-size:12px;white-space:nowrap}.meta{font-size:12px;color:var(--sub);margin-top:6px;line-height:1.5}.scores{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:12px}.score{background:#f7f8fa;border-radius:11px;padding:9px 4px;text-align:center}.score b{display:block;font-size:18px}.score span{font-size:9px;color:var(--sub)}.patterns{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}.tag{background:#eef4ff;color:#3538cd;padding:5px 7px;border-radius:999px;font-size:11px;font-weight:700}.decision{margin-top:10px;padding:10px;border-radius:11px;background:#fafafa;font-size:13px;font-weight:800}.plan{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-top:9px}.p{border:1px solid var(--line);border-radius:10px;padding:7px;text-align:center}.p b{display:block;font-size:12px}.p span{font-size:9px;color:var(--sub)}.reason{font-size:12px;line-height:1.65;color:#475467;margin-top:10px}.warn{color:var(--warn)}.bad{color:var(--bad)}.good{color:var(--good)}#status{text-align:center;color:var(--sub);margin:12px;font-size:13px}.foot{font-size:10px;color:#98a2b3;line-height:1.5;margin:14px 2px 28px}
-@media(max-width:700px){.scores{grid-template-columns:repeat(2,1fr)}.plan{grid-template-columns:repeat(2,1fr)}.plan .p:last-child{grid-column:span 2}}
-</style></head><body><header><h1>📊 코인 저점상승 탐색기 v5.2</h1><div class="sub">빗썸·업비트 선택 배포 | B형 저점 상승 우선 | 구조 · 타이밍 · 짧은 손절 | A/C 보조 관찰</div></header><main><button class="btn" onclick="scan()">🔍 지금 탐색</button><a href="/backtest" style="display:block;text-align:center;margin-top:10px;font-size:14px;font-weight:700;color:#175cd3">🧪 백테스트 화면 열기</a><div id="status">버튼을 누르면 선택 거래소의 KRW 종목을 분석합니다.</div><div id="list"></div><div class="foot">분석 보조용 도구입니다. 신호는 미래 수익을 보장하지 않으며, 호가·체결 데이터는 순간적으로 바뀔 수 있습니다. 주문 실행 기능은 포함하지 않았습니다.</div></main>
+*{box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR",sans-serif;background:var(--bg);margin:0;color:var(--text)}header{background:#fff;padding:20px 16px;border-bottom:1px solid var(--line)}h1{font-size:23px;margin:0 0 5px}.sub{font-size:12px;color:var(--sub);line-height:1.5}main{max-width:980px;margin:auto;padding:14px}.btn{width:100%;padding:16px;border:0;border-radius:14px;background:#111;color:#fff;font-size:17px;font-weight:800}.card{background:var(--card);border-radius:17px;padding:15px;margin:13px 0;box-shadow:0 1px 5px #0001}.row{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}.coin{font-size:21px;font-weight:850}.badge{padding:6px 9px;border-radius:999px;background:#eef0f2;font-weight:800;font-size:12px;white-space:nowrap}.meta{font-size:12px;color:var(--sub);margin-top:6px;line-height:1.5}.scores{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:12px}.score{background:#f7f8fa;border-radius:11px;padding:9px 4px;text-align:center}.score b{display:block;font-size:18px}.score span{font-size:9px;color:var(--sub)}.patterns{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}.tag{background:#eef4ff;color:#3538cd;padding:5px 7px;border-radius:999px;font-size:11px;font-weight:700}.decision{margin-top:10px;padding:10px;border-radius:11px;background:#fafafa;font-size:13px;font-weight:800}.plan{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;margin-top:9px}.p{border:1px solid var(--line);border-radius:10px;padding:7px;text-align:center}.p b{display:block;font-size:12px}.p span{font-size:9px;color:var(--sub)}.reason{font-size:12px;line-height:1.65;color:#475467;margin-top:10px}.warn{color:var(--warn)}.bad{color:var(--bad)}.good{color:var(--good)}#status{text-align:center;color:var(--sub);margin:12px;font-size:13px}.foot{font-size:10px;color:#98a2b3;line-height:1.5;margin:14px 2px 28px}.trig{margin-top:9px;font-size:12px;background:#f0f6ff;border-radius:10px;padding:9px;color:#175cd3;line-height:1.55;font-weight:600}.jr{margin-top:9px;font-size:12px}.jr summary{cursor:pointer;font-weight:700;color:#475467}.jr pre{white-space:pre-wrap;word-break:break-word;background:#f7f8fa;border-radius:10px;padding:10px;font-size:11px;line-height:1.65;margin:7px 0}.jr button{padding:9px 14px;border:1px solid var(--line);border-radius:10px;background:#fff;font-weight:700;font-size:12px}.regime{margin:10px 0;padding:11px;border-radius:11px;background:#fff;font-size:13px;font-weight:800;text-align:center;border:1px solid var(--line)}
+@media(max-width:700px){.scores{grid-template-columns:repeat(2,1fr)}.plan{grid-template-columns:repeat(2,1fr)}}
+</style></head><body><header><h1>📊 코인 저점상승 탐색기 v5.3</h1><div class="sub">빗썸·업비트 선택 배포 | B형 저점 상승 우선 | 진입봉 3조건 판정 · 장세 기준 체결강도 · 호가벽/사다리 탐지 | 일지 블록 자동 생성</div></header><main><button class="btn" onclick="scan()">🔍 지금 탐색</button><a href="/backtest" style="display:block;text-align:center;margin-top:10px;font-size:14px;font-weight:700;color:#175cd3">🧪 백테스트 화면 열기</a><div id="status">버튼을 누르면 선택 거래소의 KRW 종목을 분석합니다.</div><div id="list"></div><div class="foot">분석 보조용 도구입니다. 신호는 미래 수익을 보장하지 않으며, 호가·체결 데이터는 순간적으로 바뀔 수 있습니다. 주문 실행 기능은 포함하지 않았습니다.</div></main>
 <script>
 const esc=t=>String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+function cp(id,btn){const el=document.getElementById(id);if(!el)return;navigator.clipboard.writeText(el.textContent).then(()=>{btn.textContent='복사됨';setTimeout(()=>btn.textContent='복사',1500)}).catch(()=>{const r=document.createRange();r.selectNodeContents(el);const s=getSelection();s.removeAllRanges();s.addRange(r);btn.textContent='길게 눌러 복사'})}
 const won=v=>v>=1e8?(v/1e8).toFixed(1)+"억":Math.round(v).toLocaleString();
 const px=v=>v==null?'-':(v>=1000?Math.round(v).toLocaleString():v>=100?v.toFixed(1):v>=1?v.toFixed(2):v.toFixed(4));
-async function scan(){const s=document.querySelector('#status'),l=document.querySelector('#list');s.textContent='B형 저점 상승 후보 탐색 → 진입 타이밍 분석 중…';l.innerHTML='';try{const r=await fetch('/api/scan');const d=await r.json();if(!r.ok||d.ok===false)throw new Error(d.detail||d.error||'API 오류');s.textContent='완료 · '+d.note;l.innerHTML=d.items.map(x=>`<div class="card"><div class="row"><div><span class="coin">${x.market}</span> ${px(x.price)}원<div class="meta">${x.change>=0?'+':''}${x.change.toFixed(2)}% · 24H ${won(x.turnover)} · RVOL ${x.rvol.toFixed(2)} · RSI15 ${x.rsi15.toFixed(1)}</div></div><span class="badge">${x.decision}</span></div><div class="scores"><div class="score"><b>${x.structure}</b><span>Structure</span></div><div class="score"><b>${x.timing}</b><span>Timing</span></div><div class="score"><b>${x.trend}</b><span>Trend</span></div><div class="score"><b>${x.setup}</b><span>Setup</span></div><div class="score"><b>${x.entry}</b><span>Entry</span></div><div class="score"><b>${x.risk}</b><span>Risk (상대 점수)</span></div><div class="score"><b>${x.pressure.score}</b><span>매도 압력 (높을수록 위험)</span></div></div><div class="patterns">${x.patterns.map(p=>`<span class="tag">${p}</span>`).join('')}${(x.rebound||[]).map(p=>`<span class="tag" style="background:#ecfdf3;color:#067647">↗ ${p}</span>`).join('')}</div><div class="decision ${x.decision_class}">${x.summary}</div><div class="plan"><div class="p"><b>${px(x.plan.entry)}</b><span>진입 기준</span></div><div class="p"><b>${px(x.plan.stop)}</b><span>단기 구조 손절</span></div><div class="p"><b>${px(x.plan.target1)}</b><span>1차 목표</span></div><div class="p"><b>${px(x.plan.target2)}</b><span>2차 목표</span></div><div class="p"><b>${x.plan.rr==null?'-':x.plan.rr.toFixed(2)+'R'}</b><span>1차 목표 R:R</span></div></div><div class="meta">분석 기준가 ${px(x.basis_price)}원 (현재가와 ${x.price_gap_pct>=0?'+':''}${x.price_gap_pct.toFixed(2)}% 차이) · 손절 거리 ${x.plan.stop_pct.toFixed(2)}% · ATR 기준 최소 ${x.plan.noise_floor_pct.toFixed(2)}% · 패턴 ${x.pattern_type} · MA7 이격 ${x.ma7_gap.toFixed(2)}% · 매수/매도잔량 ${x.bid_ask_ratio.toFixed(2)}배 · 체결강도(근사) ${x.trade_strength.toFixed(0)}%</div><div class="reason">✓ ${x.reasons.map(esc).join(' · ')||'조건 탐색 중'}${x.guard_flags&&x.guard_flags.length?`<br><span class="bad">⛔ 하락 방어: ${x.guard_flags.map(esc).join(' · ')}</span>`:''}${x.pressure.flags.length?`<br><span class="warn">매도 압력: ${x.pressure.flags.map(esc).join(' · ')}</span>`:''}${x.warnings.length?`<br><span class="warn">⚠ ${x.warnings.map(esc).join(' · ')}</span>`:''}${x.invalidations.length?`<br><span class="bad">⛔ 무효화: ${x.invalidations.map(esc).join(' · ')}</span>`:''}</div></div>`).join('');}catch(e){s.textContent='탐색 실패: '+e.message}}
+async function scan(){const s=document.querySelector('#status'),l=document.querySelector('#list');s.textContent='B형 저점 상승 후보 탐색 → 진입 타이밍 분석 중…';l.innerHTML='';try{const r=await fetch('/api/scan');const d=await r.json();if(!r.ok||d.ok===false)throw new Error(d.detail||d.error||'API 오류');s.innerHTML='완료 · '+esc(d.note);l.innerHTML='';l.innerHTML=d.items.map((x,i)=>`<div class="card"><div class="row"><div><span class="coin">${x.market}</span> ${px(x.price)}원<div class="meta">${x.change>=0?'+':''}${x.change.toFixed(2)}% · 24H ${won(x.turnover)} · RVOL ${x.rvol.toFixed(2)} · RSI15 ${x.rsi15.toFixed(1)}</div></div><span class="badge">${x.decision}</span></div><div class="scores"><div class="score"><b>${x.structure}</b><span>Structure</span></div><div class="score"><b>${x.timing}</b><span>Timing</span></div><div class="score"><b>${x.trend}</b><span>Trend</span></div><div class="score"><b>${x.setup}</b><span>Setup</span></div><div class="score"><b>${x.entry}</b><span>Entry</span></div><div class="score"><b>${x.risk}</b><span>Risk (상대 점수)</span></div><div class="score"><b>${x.pressure.score}</b><span>매도 압력 (높을수록 위험)</span></div></div><div class="patterns">${x.patterns.map(p=>`<span class="tag">${p}</span>`).join('')}${(x.rebound||[]).map(p=>`<span class="tag" style="background:#ecfdf3;color:#067647">↗ ${p}</span>`).join('')}</div><div class="decision ${x.decision_class}">${x.summary}</div><div class="plan"><div class="p"><b>${px(x.plan.entry)}</b><span>진입 기준 · ${esc(x.plan.entry_type||'-')}</span></div><div class="p"><b>${px(x.plan.stop)}</b><span>손절${x.plan.stop_source?' · '+esc(x.plan.stop_source):''}</span></div><div class="p"><b>${px(x.plan.recover)}</b><span>원금 회수</span></div><div class="p"><b>${px(x.plan.target1)}</b><span>1차 목표</span></div><div class="p"><b>${px(x.plan.target2)}</b><span>2차 목표</span></div><div class="p"><b>${x.plan.rr==null?'-':x.plan.rr.toFixed(2)+'R'}</b><span>1차 목표 R:R</span></div></div><div class="meta">분석 기준가 ${px(x.basis_price)}원 (현재가와 ${x.price_gap_pct>=0?'+':''}${x.price_gap_pct.toFixed(2)}% 차이) · 손절 거리 ${x.plan.stop_pct.toFixed(2)}% · ATR 기준 최소 ${x.plan.noise_floor_pct.toFixed(2)}% · 패턴 ${x.pattern_type} · MA7 이격 ${x.ma7_gap.toFixed(2)}% · 매수/매도잔량 ${x.bid_ask_ratio.toFixed(2)}배 · 체결강도 ${x.trade_strength==null?'측정 불가':x.trade_strength.toFixed(0)+'%'}${x.rel_strength?' (장세 대비 '+x.rel_strength.toFixed(2)+'배)':''}</div><div class="reason">✓ ${x.reasons.map(esc).join(' · ')||'조건 탐색 중'}${x.guard_flags&&x.guard_flags.length?`<br><span class="bad">⛔ 하락 방어: ${x.guard_flags.map(esc).join(' · ')}</span>`:''}${x.pressure.flags.length?`<br><span class="warn">매도 압력: ${x.pressure.flags.map(esc).join(' · ')}</span>`:''}${x.warnings.length?`<br><span class="warn">⚠ ${x.warnings.map(esc).join(' · ')}</span>`:''}${x.invalidations.length?`<br><span class="bad">⛔ 무효화: ${x.invalidations.map(esc).join(' · ')}</span>`:''}</div><div class="trig">🎯 진입봉 3조건: ${esc(x.entry_check.state)} — ${esc(x.entry_check.detail)}</div><details class="jr"><summary>📋 일지용 요약 (복사해서 일지 대화에 붙여넣기)</summary><pre id="j${i}">${esc((x.journal||[]).join('\n'))}</pre><button onclick="cp('j'+${i},this)">복사</button></details></div>`).join('');}catch(e){s.textContent='탐색 실패: '+e.message}}
 </script></body></html>'''
 
 # 빗썸 공개 시세 API: 보수적인 요청 간격 및 429 재시도.
@@ -175,18 +176,59 @@ def nearest_below(levels, price):
     a=[x for x in levels if x<price*.998]
     return max(a) if a else None
 
+EMPTY_FLOW={'ratio':1.0,'wall_ratio':1.0,'strength':None,'ticks':0,'book_ok':False,
+            'ask_wall':None,'bid_wall':None,'bid_ladder':None,'ask_ladder':None}
+
+def ladder_block(levels,tol_pct,min_levels):
+    """크기가 거의 같은 호가가 연속으로 깔린 구간(마켓메이커 사다리 주문)을 찾는다.
+    반환 (호가 단수, 구간 총잔량, 한 단 크기). 없으면 (0,0,0)."""
+    if len(levels)<min_levels: return 0,0.0,0.0
+    best=(0,0.0,0.0); i=0
+    while i<len(levels):
+        base=levels[i][1]
+        if base<=0:
+            i+=1; continue
+        j=i+1
+        while j<len(levels) and abs(levels[j][1]-base)/base*100<=tol_pct: j+=1
+        if j-i>=min_levels and j-i>best[0]:
+            best=(j-i,sum(x[1] for x in levels[i:j]),base)
+        i=j if j>i+1 else i+1
+    return best
+
 def orderflow(market):
+    """호가 잔량·벽 구조와 실제 체결 기준 체결강도.
+    체결 틱이 모자라면 strength=None. 값을 지어내지 않는다 (v5.2의 200% 더미 제거)."""
+    cf=CFG['flow']; co=CFG.get('orderbook',{})
+    out=dict(EMPTY_FLOW)
     try:
-        book=get('/v1/orderbook',{'markets':market})[0]; asks=f(book.get('total_ask_size')); bids=f(book.get('total_bid_size')); ratio=bids/asks if asks else 1.0
-        units=book.get('orderbook_units',[])[:10]
-        max_ask=max((f(x.get('ask_size')) for x in units),default=0); max_bid=max((f(x.get('bid_size')) for x in units),default=0)
-        wall_ratio=max_bid/max_ask if max_ask else 1.0
+        book=get('/v1/orderbook',{'markets':market})[0]
+        ask_tot=f(book.get('total_ask_size')); bid_tot=f(book.get('total_bid_size'))
+        out['ratio']=bid_tot/ask_tot if ask_tot else 1.0
+        units=book.get('orderbook_units',[])[:co.get('wall_top_n',15)]
+        asks=[(f(u.get('ask_price')),f(u.get('ask_size'))) for u in units if f(u.get('ask_size'))>0]
+        bids=[(f(u.get('bid_price')),f(u.get('bid_size'))) for u in units if f(u.get('bid_size'))>0]
+        if asks and bids:
+            out['book_ok']=True
+            a=max(asks,key=lambda x:x[1]); b=max(bids,key=lambda x:x[1])
+            out['ask_wall']={'price':a[0],'size':a[1]}
+            out['bid_wall']={'price':b[0],'size':b[1]}
+            out['wall_ratio']=b[1]/a[1] if a[1] else 1.0
+            tol=co.get('ladder_tolerance_pct',3.0); mn=co.get('ladder_min_levels',4)
+            for key,arr,tot in (('bid_ladder',bids,bid_tot),('ask_ladder',asks,ask_tot)):
+                n,sz,unit=ladder_block(arr,tol,mn)
+                if n: out[key]={'levels':n,'size':sz,'unit':unit,'share':(sz/tot if tot else 0)}
     except Exception:
-        ratio,wall_ratio=1.0,1.0
+        pass
     try:
-        ticks=get('/v1/trades/ticks',{'market':market,'count':120}); bv=sum(f(x.get('trade_volume')) for x in ticks if x.get('ask_bid')=='BID'); sv=sum(f(x.get('trade_volume')) for x in ticks if x.get('ask_bid')=='ASK'); strength=100*bv/sv if sv else (200 if bv else 100)
-    except Exception: strength=100
-    return ratio,wall_ratio,strength
+        ticks=get('/v1/trades/ticks',{'market':market,'count':cf.get('tick_count',500)})
+        bv=sum(f(x.get('trade_volume')) for x in ticks if x.get('ask_bid')=='BID')
+        sv=sum(f(x.get('trade_volume')) for x in ticks if x.get('ask_bid')=='ASK')
+        out['ticks']=len(ticks)
+        if len(ticks)>=cf.get('min_ticks_for_strength',60) and sv>0:
+            out['strength']=100*bv/sv
+    except Exception:
+        pass
+    return out
 
 def rvol(c,n=20):
     v=vals(c,'candle_acc_trade_price')
@@ -334,6 +376,92 @@ def rebound_signals(c15):
         tags.append('단기 이평 리클레임')
     return tags
 
+def entry_trigger_check(c15,trigger):
+    """사용자 진입봉 3조건을 코드가 직접 판정한다.
+      ① 돌파선을 꼬리가 아닌 '몸통'으로 넘긴 15분봉
+      ② 그 봉 거래량이 직전 5~10봉 평균의 약 2배
+      ③ 다음 봉이 그 선 위에서 마감(확인봉)
+    확인봉 마감이 진입 시점이고, 돌파봉 자체는 추격하지 않는다."""
+    cfg=CFG.get('entry_trigger',{})
+    out={'state':'선 미설정','breakout_idx':None,'vol_mult':None,'confirm_low':None,
+         'trigger':trigger,'detail':''}
+    if not trigger or len(c15)<25: return out
+    v=vals(c15,'candle_acc_trade_price'); base_n=cfg.get('vol_base_bars',10)
+    look=cfg.get('lookback_bars',5); need=cfg.get('volume_mult',2.0); soft=cfg.get('volume_mult_min',1.7)
+    out['state']='대기'
+    out['detail']=f'{trigger:,.4f} 위로 몸통 마감 + 거래량 {need:.1f}배를 기다리는 자리'
+    last=len(c15)-1
+    for i in range(max(1,last-look+1),last+1):
+        o=f(c15[i]['opening_price']); c=f(c15[i]['trade_price'])
+        if not (c>trigger and o<=trigger):   # 몸통으로 선을 넘긴 봉만 인정 (윗꼬리만 걸친 봉 제외)
+            continue
+        prev=v[max(0,i-base_n):i]
+        mult=(v[i]/(sum(prev)/len(prev))) if prev and sum(prev)>0 else 0
+        out['breakout_idx']=i; out['vol_mult']=round(mult,2)
+        if mult<soft:
+            out['state']='돌파봉 거래량 미달'
+            out['detail']=f'몸통 돌파는 나왔지만 거래량 {mult:.2f}배로 기준({need:.1f}배) 미달'
+            return out
+        if i==last:
+            out['state']='돌파봉 발생'
+            out['detail']=f'거래량 {mult:.2f}배 몸통 돌파. 다음 15분봉이 {trigger:,.4f} 위에서 마감하면 진입'
+            return out
+        nxt=c15[i+1]
+        if f(nxt['trade_price'])>trigger:
+            out['state']='확인 완료'; out['confirm_low']=f(nxt['low_price'])
+            out['detail']=f'거래량 {mult:.2f}배 돌파 + 확인봉 마감 완료. 진입 조건 충족'
+        else:
+            out['state']='돌파 실패'
+            out['detail']=f'돌파 후 확인봉이 {trigger:,.4f} 아래에서 마감. 재돌파까지 보류'
+        return out
+    return out
+
+def apply_rule_stop(plan,c15,trig):
+    """확인봉이 나왔으면 손절을 본인 규칙으로 교체한다:
+    확인봉 저가 아래 / 15분 60이평 아래 중 가까운 쪽(= 둘 중 높은 값)."""
+    if not trig or trig.get('state')!='확인 완료' or trig.get('confirm_low') is None:
+        return plan
+    entry=plan['entry']; m60=ma(closes(c15),60)
+    cands=[x for x in (trig['confirm_low'],m60) if x and 0<x<entry]
+    if not cands: return plan
+    base=max(cands)
+    atrv=atr(c15,CFG['risk']['atr_period']) or entry*.01
+    stop=base-max(entry*.001,atrv*CFG['risk']['stop_buffer_atr'])
+    if stop<=0 or stop>=entry: return plan
+    stop_pct=(entry-stop)/entry*100; noise=plan.get('noise_floor_pct',CFG['risk']['min_stop_pct'])
+    plan=dict(plan)
+    plan.update({'stop':stop,'stop_pct':stop_pct,
+                 'stop_source':'확인봉 저가' if base==trig['confirm_low'] else '15분 60이평',
+                 'stop_too_tight':stop_pct<noise,
+                 'stop_eligible':stop_pct<=CFG['risk']['max_stop_pct'] and stop_pct>=noise})
+    t1=plan.get('target1')
+    plan['rr']=(t1-entry)/(entry-stop) if t1 and entry>stop else None
+    return plan
+
+def fmt_px(v):
+    if v is None: return '-'
+    return f'{v:,.0f}' if abs(v)>=1000 else (f'{v:,.2f}' if abs(v)>=1 else f'{v:,.4f}')
+
+def journal_block(r):
+    """종목 분석 대화에서 쓰던 7줄 요약을 탐색기가 바로 만들어 준다 (일지 대화에 복사용)."""
+    p=r['plan']; ec=r.get('entry_check') or {}
+    st=r.get('trade_strength'); rel=r.get('rel_strength')
+    strength=('측정 불가' if st is None else f'{st:.0f}%'+(f' (장세 대비 {rel:.2f}배)' if rel else ''))
+    walls=' · '.join(r.get('flow_notes') or []) or '특이 벽 없음'
+    rr=p.get('rr')
+    return [
+        f"추세: {r['pattern_type']} · {'/'.join(r['patterns'])} · Trend {r['trend']} / Structure {r['structure']}",
+        f"거래량: RVOL {r['rvol']:.2f} · 24H {r['turnover']/1e8:.1f}억"+(f" · 돌파봉 거래량 {ec['vol_mult']:.2f}배" if ec.get('vol_mult') else ""),
+        f"호가: 체결강도 {strength} · 매수/매도잔량 {r['bid_ask_ratio']:.2f}배 · {walls}",
+        f"지지·저항: 지지 {fmt_px(p.get('support'))} / 저항 {fmt_px(p.get('target1'))} · {fmt_px(p.get('target2'))}",
+        f"판단: {r['decision']} · 진입봉 {ec.get('state','-')} ({ec.get('detail','')})",
+        f"진입·손절·목표: {fmt_px(p.get('entry'))}({p.get('entry_type','-')}) / {fmt_px(p.get('stop'))}"
+        + (f"[{p['stop_source']}]" if p.get('stop_source') else "")
+        + f" / 원금회수 {fmt_px(p.get('recover'))} → 목표 {fmt_px(p.get('target1'))}"
+        + (f" ({rr:.2f}R)" if rr else ""),
+        f"무효화: {' · '.join(r['invalidations'][:2]) if r.get('invalidations') else '-'}",
+    ]
+
 def timing_score(c15,c60):
     p=closes(c15); h=macd_hist(p); r=rsi(p); score=0
     if p[-1]>ma(p,7):score+=20
@@ -446,9 +574,22 @@ def make_trade_plan(c4,c60,c15,pattern_scores,structure=None):
     support=nearest_below(lows_all,now)
     resistance=nearest_above(highs_all,now)
     dominant=max(pattern_scores,key=pattern_scores.get)
-    entry=now
-    if dominant=='돌파형':
-        entry=max(now,max(highs(c15[-21:-1]))*1.001)
+    # 진입 기준가는 '지금 가격'이 아니라 몸통으로 넘어야 확인되는 구조적 선으로 잡는다.
+    # 돌파형은 최근 20봉 고점, 그 외는 현재가 위의 가장 가까운 확정 스윙 고점.
+    ce=CFG.get('entry_level',{})
+    buf=1+ce.get('trigger_buffer_pct',0.1)/100
+    bar_high=max(highs(c15[-21:-1]))*buf if len(c15)>=22 else None
+    trigger=bar_high
+    if dominant!='돌파형':
+        above=[v for _,v in confirmed_pivots(c15,'high',lookback=ce.get('pivot_lookback_15m',60)) if v>now]
+        trigger=min(above)*buf if above else bar_high
+    entry=now; entry_type='현재가'; trigger_gap=0.0
+    if trigger and trigger>now:
+        trigger_gap=(trigger-now)/now*100
+        if trigger_gap<=ce.get('max_trigger_distance_pct',2.5):
+            entry=trigger; entry_type='돌파 확인선'
+        else:
+            entry_type='돌파선 원거리'
     # Tight stops are not forced above structural invalidation: skip if the structure is too far away.
     buffer=max(entry*.001,atrv*CFG['risk']['stop_buffer_atr'])
     candidate_supports=[v for v in (support,(structure or {}).get('support')) if v and v<entry]
@@ -468,7 +609,8 @@ def make_trade_plan(c4,c60,c15,pattern_scores,structure=None):
     rr=(target1-entry)/(entry-stop) if target1 and entry>stop else None
     return {'entry':entry,'stop':stop,'stop_pct':stop_pct,'stop_eligible':stop_eligible,
             'target1':target1,'target2':target2,'rr':rr,'support':support,
-            'resistance':resistance,'dominant':dominant,'stop_too_tight':stop_too_tight,'noise_floor_pct':round(noise_floor,2),'structural_support':nearest}
+            'resistance':resistance,'dominant':dominant,'stop_too_tight':stop_too_tight,'noise_floor_pct':round(noise_floor,2),'structural_support':nearest,
+            'entry_type':entry_type,'trigger_gap_pct':round(trigger_gap,2),'trigger':trigger,'stop_source':None}
 
 
 def entry_guard(c15, t):
@@ -505,8 +647,9 @@ def entry_guard(c15, t):
     return flags, {'drawdown_pct':round(drawdown,2),'rsi_closed':round(last_rsi,1),
                    'macd_falling':falling_macd,'red_count':red_count}
 
-def score_all(t,c4,c60,c15,cd,now_dt=None,flow=None):
-    """now_dt/flow는 백테스트용 주입값. 실시간 스캔에서는 비워 둔다."""
+def score_all(t,c4,c60,c15,cd,now_dt=None,flow=None,market_strength=None):
+    """now_dt/flow는 백테스트용 주입값. 실시간 스캔에서는 비워 둔다.
+    market_strength: 같은 회차에 분석한 종목들의 체결강도 중앙값(장세 기준선)."""
     if min(len(c4),len(c60),len(c15))<80 or len(cd)<181:
         raise ValueError('확정봉 분석 데이터 부족')
     last=datetime.fromisoformat(c15[-1]['candle_date_time_kst']).replace(tzinfo=KST)
@@ -519,6 +662,12 @@ def score_all(t,c4,c60,c15,cd,now_dt=None,flow=None):
     structure=structure_info['score']
     timing=timing_score(c15,c60)
     plan=make_trade_plan(c4,c60,c15,pattern_scores,structure_info)
+    # 15분봉 진입봉 3조건 판정 → 확인봉이 나왔으면 손절도 본인 규칙으로 교체
+    entry_check=entry_trigger_check(c15,plan.get('trigger'))
+    plan=apply_rule_stop(plan,c15,entry_check)
+    # 익절: 먼저 원금 회수(기본 1R), 잔여 물량만 목표까지
+    plan['recover']=(plan['entry']+(plan['entry']-plan['stop'])*CFG.get('exit',{}).get('recover_r',1.0)
+                     if plan['entry']>plan['stop'] else None)
     guard_flags,guard_metrics=entry_guard(c15,t)
     pressure=selling_pressure(c15,c60,t)
     rebound=rebound_signals(c15)
@@ -564,17 +713,45 @@ def score_all(t,c4,c60,c15,cd,now_dt=None,flow=None):
     elif plan['rr'] is not None and plan['rr']>=CFG['risk']['min_rr']:entry+=5
     entry=min(100,entry)
     # Flow confirm (not core signal)
-    ratio,wall_ratio,strength=flow if flow else orderflow(t['market'])
+    fl=flow if isinstance(flow,dict) else (orderflow(t['market']) if flow is None else
+        {**EMPTY_FLOW,'ratio':flow[0],'wall_ratio':flow[1],'strength':flow[2]})
+    ratio=fl.get('ratio',1.0); wall_ratio=fl.get('wall_ratio',1.0); strength=fl.get('strength')
     if ratio>=CFG['flow']['bid_ask_strong']:reasons.append(f'매수잔량 우세 {ratio:.1f}배')
     elif ratio<0.75:warnings.append('매도잔량 우세')
-    if strength>=CFG['flow']['trade_strength_strong']:reasons.append(f'체결강도 {strength:.0f}%')
+    # 체결강도는 절대값이 아니라 같은 회차 다른 종목 대비 상대값으로 본다.
+    # 전 종목이 비슷하면 종목 특성이 아니라 장세이기 때문.
+    rel_strength=None
+    if strength is None:
+        if fl.get('ticks',0) or fl.get('book_ok'):
+            warnings.append('체결 데이터 부족: 체결강도 미산정')
+    elif market_strength:
+        rel_strength=strength/market_strength
+        if rel_strength>=CFG['flow'].get('rel_strength_strong',1.25):
+            reasons.append(f'체결강도 {strength:.0f}% (장세 대비 {rel_strength:.2f}배)')
+        elif rel_strength<=CFG['flow'].get('rel_strength_weak',0.85):
+            warnings.append(f'체결강도 {strength:.0f}%: 장세 중앙값보다 약함')
+    elif strength>=CFG['flow']['trade_strength_strong']:reasons.append(f'체결강도 {strength:.0f}%')
     elif strength<80:warnings.append('최근 매도체결 우세')
+    # 호가벽: 바로 위 매도벽과, 지지로 착각하기 쉬운 사다리 주문
+    co=CFG.get('orderbook',{}); flow_notes=[]
+    aw=fl.get('ask_wall'); bw=fl.get('bid_wall')
+    if aw and aw['price']>now:
+        gap=(aw['price']-now)/now*100
+        flow_notes.append(f"매도벽 {aw['price']:,.4f} (+{gap:.2f}%)")
+        if gap<=co.get('near_wall_pct',1.0):
+            warnings.append(f"{aw['price']:,.4f} 바로 위 매도벽: 돌파에 물량 소화 필요")
+    if bw and bw['price']<now:
+        flow_notes.append(f"매수벽 {bw['price']:,.4f} (-{(now-bw['price'])/now*100:.2f}%)")
+    bl=fl.get('bid_ladder')
+    if bl and bl.get('share',0)>=co.get('ladder_share_warn',0.4):
+        warnings.append(f"매수잔량의 {bl['share']*100:.0f}%가 {bl['levels']}단 사다리 주문: 언제든 취소될 수 있어 지지로 보기 어려움")
+        flow_notes.append(f"매수 사다리 {bl['levels']}단")
     # Risk 0-100, higher = worse
     risk=10
     if ma7_gap>CFG['ma']['overextension_warn_pct']:risk+=15
     if ma7_gap>CFG['ma']['overextension_block_pct']:risk+=20
     if rr>CFG['entry']['rsi_hot']:risk+=15
-    if strength>=CFG['flow']['trade_strength_hot']:risk+=8; warnings.append('단기 체결 과열 가능')
+    if strength is not None and strength>=CFG['flow']['trade_strength_hot']:risk+=8; warnings.append('단기 체결 과열 가능')
     tv=f(t.get('acc_trade_price_24h'))
     if tv<5e8:risk+=25; warnings.append('저유동성')
     elif tv<1e9:risk+=15
@@ -618,7 +795,14 @@ def score_all(t,c4,c60,c15,cd,now_dt=None,flow=None):
         decision='구조 미확인';dclass='bad';summary='확정된 4시간봉 저점 상승 구조가 충분하지 않음.'
     if rebound and decision=='B형 반등 대기':
         summary+=' 단기 반등 태그 감지('+', '.join(rebound)+'): 관찰용이며 진입 신호는 아님.'
-    return dict(rebound=rebound,market=t['market'].replace('KRW-',''),price=f(t['trade_price']),basis_price=now,price_gap_pct=round(price_gap,2),change=f(t.get('signed_change_rate'))*100,turnover=tv,rvol=rv,rsi15=rr,trend=trend,setup=int(round(setup)),entry=entry,risk=risk,pressure=pressure,structure=structure,timing=timing,pattern_type=pattern_type,structure_info=structure_info,patterns=patterns,pattern_scores=pattern_scores,decision=decision,decision_class=dclass,summary=summary,plan={k:(round(v,8) if isinstance(v,float) else v) for k,v in plan.items() if k in ('entry','stop','stop_pct','stop_too_tight','noise_floor_pct','target1','target2','rr')},ma7_gap=ma7_gap,bid_ask_ratio=ratio,trade_strength=strength,guard=guard_metrics,guard_flags=guard_flags,reasons=reasons[:10],warnings=warnings[:8],invalidations=invalid[:4])
+    # '하루 종일 관망'이 아니라 '무엇이 켜질 때까지 관망'인지 항상 같이 적는다.
+    if decision!='B형 진입 검토' and plan.get('trigger'):
+        summary+=f" 재판단 시점: {fmt_px(plan['trigger'])} 위로 몸통 마감한 15분봉 + 거래량 {CFG.get('entry_trigger',{}).get('volume_mult',2.0):.1f}배 (이 가격에 알림을 걸어두세요)."
+    elif decision=='B형 진입 검토' and entry_check.get('state')!='확인 완료':
+        summary+=f" 아직 진입봉 미확인: {entry_check.get('detail','')}"
+    result=dict(rebound=rebound,market=t['market'].replace('KRW-',''),price=f(t['trade_price']),basis_price=now,price_gap_pct=round(price_gap,2),change=f(t.get('signed_change_rate'))*100,turnover=tv,rvol=rv,rsi15=rr,trend=trend,setup=int(round(setup)),entry=entry,risk=risk,pressure=pressure,structure=structure,timing=timing,pattern_type=pattern_type,structure_info=structure_info,patterns=patterns,pattern_scores=pattern_scores,decision=decision,decision_class=dclass,summary=summary,plan={k:(round(v,8) if isinstance(v,float) else v) for k,v in plan.items() if k in ('entry','stop','stop_pct','stop_too_tight','noise_floor_pct','target1','target2','rr','entry_type','trigger_gap_pct','trigger','stop_source','recover','support')},ma7_gap=ma7_gap,bid_ask_ratio=ratio,trade_strength=strength,rel_strength=(round(rel_strength,2) if rel_strength else None),flow_notes=flow_notes,entry_check=entry_check,guard=guard_metrics,guard_flags=guard_flags,reasons=reasons[:10],warnings=warnings[:8],invalidations=invalid[:4])
+    result['journal']=journal_block(result)
+    return result
 
 def preliminary(t):
     c4=candles(t['market'],240,200); p4=closes(c4); m7,m14,m30=ma(p4,7),ma(p4,14),ma(p4,30); rv=rvol(c4)
@@ -659,24 +843,38 @@ def scan():
                 ps,c4=preliminary(t); first.append((ps,t,c4)); time.sleep(.035)
             except Exception as e: skipped.append(f"{t.get('market')}:{type(e).__name__}")
         first.sort(key=lambda x:x[0],reverse=True)
+        deep=first[:CFG['scan']['deep_top_n']]
+        # 체결 흐름을 먼저 모아 이번 회차의 '장세 기준선'(체결강도 중앙값)을 만든다.
+        # 전 종목 체결강도가 비슷하면 그건 종목 특성이 아니라 장세이기 때문.
+        flows={}
+        for _,t,_c in deep:
+            try: flows[t['market']]=orderflow(t['market']); time.sleep(.03)
+            except Exception: flows[t['market']]=dict(EMPTY_FLOW)
+        ss=[v['strength'] for v in flows.values() if v and v.get('strength') is not None]
+        market_strength=statistics.median(ss) if ss else None
+        gate=CFG['flow'].get('market_gate_median',90)
+        if market_strength is None: regime='장세 측정 불가'
+        elif market_strength<gate: regime=f'매도 우위 장세 (체결강도 중앙값 {market_strength:.0f}%) · 롱 셋업 비권장'
+        else: regime=f'매수 우위 장세 (체결강도 중앙값 {market_strength:.0f}%)'
         out=[]
-        for _,t,c4 in first[:CFG['scan']['deep_top_n']]:
+        for _,t,c4 in deep:
             try:
                 c60=candles(t['market'],60,160); c15=candles(t['market'],15,160); cd=days(t['market'],200)
-                out.append(score_all(t,c4,c60,c15,cd)); time.sleep(.05)
+                out.append(score_all(t,c4,c60,c15,cd,flow=flows.get(t['market']),market_strength=market_strength)); time.sleep(.05)
             except Exception as e: skipped.append(f"{t.get('market')}:{type(e).__name__}")
         # 매수후보 우선, 그 다음 Entry/Setup/Trend, Risk 낮은 순
         rank={'B형 진입 검토':6,'B형 관찰':5,'B형 반등 대기':4,'손절 거리 초과':3,'A/C 보조 관찰':2,'구조 미확인':0}
         out.sort(key=lambda x:(rank.get(x['decision'],0),x['structure'],x['timing'],x['entry'],-x['risk']),reverse=True)
         out=out[:CFG['scan']['output_n']]
-        return jsonify(ok=True,exchange=EXCHANGE,items=out,note=f"v5.2 · {EXCHANGE} 거래대금 상위 {CFG['scan']['ticker_top_n']}개 1차 → {len(out)}개 정밀분석",skipped=skipped[:10])
+        return jsonify(ok=True,exchange=EXCHANGE,items=out,market_strength=market_strength,regime=regime,
+                       note=f"v5.3 · {regime} · {EXCHANGE} 거래대금 상위 {CFG['scan']['ticker_top_n']}개 1차 → {len(out)}개 정밀분석",skipped=skipped[:10])
     except Exception as e:
         return jsonify(ok=False,error=type(e).__name__,detail=str(e)[:500]),500
     finally:
         SCAN_LOCK.release()
 
 @app.get('/health')
-def health(): return {'ok':True,'version':'v5.2.2','strategy':'higher-low-primary','exchange':EXCHANGE}
+def health(): return {'ok':True,'version':'v5.3.0','strategy':'higher-low-primary','exchange':EXCHANGE}
 
 # 백테스트 화면(/backtest). 위의 함수들이 모두 정의된 뒤에 불러와야 한다.
 from backtest_web import bp as backtest_bp

@@ -1,5 +1,5 @@
 {
-  "version": "5.2",
+  "version": "5.3",
   "scan": {
     "ticker_top_n": 55,
     "deep_top_n": 24,
@@ -41,7 +41,15 @@
   "flow": {
     "bid_ask_strong": 2.0,
     "trade_strength_strong": 120,
-    "trade_strength_hot": 160
+    "trade_strength_hot": 160,
+    "_설명": "체결강도는 거래소 체결 틱으로만 계산한다. 데이터가 모자라면 값을 만들지 않고 None으로 둔다.",
+    "tick_count": 500,
+    "min_ticks_for_strength": 60,
+    "market_gate_median": 90,
+    "rel_strength_strong": 1.25,
+    "rel_strength_weak": 0.85,
+    "bid_ask_ok_low": 0.8,
+    "bid_ask_ok_high": 1.6
   },
   "guard": {
     "drawdown_lookback_15m": 24,
@@ -114,5 +122,32 @@
     "structure": {
       "max_higher_low_gap_pct": 30
     }
+  },
+  "orderbook": {
+    "_설명": "호가벽 위치와 크기, 균일 크기가 반복되는 사다리(마켓메이커) 주문 탐지 기준.",
+    "wall_top_n": 15,
+    "near_wall_pct": 1.0,
+    "ladder_tolerance_pct": 3.0,
+    "ladder_min_levels": 4,
+    "ladder_share_warn": 0.4
+  },
+  "entry_level": {
+    "_설명": "진입 기준가는 현재가가 아니라 '넘어야 확인되는 선'. 너무 먼 선은 진입 계획에서 제외.",
+    "pivot_lookback_15m": 60,
+    "trigger_buffer_pct": 0.1,
+    "max_trigger_distance_pct": 2.5
+  },
+  "entry_trigger": {
+    "_설명": "진입봉 3조건: ①돌파선을 꼬리 아닌 몸통으로 넘긴 15분봉 ②그 봉 거래량이 직전 5~10봉 평균의 약 2배 ③다음 봉이 그 선 위 마감. 확인봉 마감에 진입하고 돌파봉은 추격하지 않는다.",
+    "volume_mult": 2.0,
+    "volume_mult_min": 1.7,
+    "vol_base_bars": 10,
+    "lookback_bars": 5,
+    "confirm_close_above": true
+  },
+  "exit": {
+    "_설명": "수익이 나면 먼저 원금을 회수하고 잔여 물량만 끌고 가는 방식. 익절 자리는 진입 전에 정해 둔다.",
+    "recover_r": 1.0,
+    "recover_portion_pct": 50
   }
 }
